@@ -142,3 +142,6 @@ cython_debug/
 
 # yapf config
 .style.yapf
+
+# bot config
+config.json
