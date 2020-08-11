@@ -1,4 +1,4 @@
-from .converters import TimeSpanConverter
+from . import converters
 import datetime
 import discord
 from discord.ext import commands, menus
@@ -9,7 +9,6 @@ from .player import Player
 import random
 from .track import Track
 import typing
-from . import utils
 import validators
 import wavelink
 
@@ -257,7 +256,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         result = None
         counter = 0
-        while result is None and counter < 5:
+        while result is None and counter < 10:
             result = await ctx.bot.wavelink.get_tracks(query)
             counter += 1
 
@@ -292,7 +291,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         elif track_count > 0:
             track = tracks[0]
 
-            duration = utils.format_timedelta(milliseconds=track.duration)
+            duration = converters.format_timedelta(milliseconds=track.duration)
 
             embed = discord.Embed(title='Enqueued',
                                   description=f'[{track.title}]({track.uri})',
@@ -401,7 +400,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.command()
     @commands.guild_only()
     @commands.check(is_privileged)
-    async def seek(self, ctx: commands.Context, position: TimeSpanConverter):
+    async def seek(self, ctx: commands.Context,
+                   position: converters.TimeSpanConverter):
         """Seek to a position of the currently playing track."""
         player = ctx.bot.wavelink.get_player(ctx.guild.id, cls=Player)
         if not player.is_playing:
@@ -410,7 +410,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         ms = position / datetime.timedelta(milliseconds=1)
-        position_str = utils.format_timedelta(milliseconds=ms)
+        position_str = converters.format_timedelta(milliseconds=ms)
         await player.seek(ms)
         await ctx.send(f':vhs: Seeked to **{position_str}**.', delete_after=5)
 
@@ -440,8 +440,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         track = player.current
-        position = utils.format_timedelta(milliseconds=player.position)
-        duration = utils.format_timedelta(milliseconds=track.duration)
+        position = converters.format_timedelta(milliseconds=player.position)
+        duration = converters.format_timedelta(milliseconds=track.duration)
         embed = discord.Embed(title='Now Playing',
                               description=f'[{track.title}]({track.uri})',
                               timestamp=track.requested_at)
@@ -453,7 +453,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await ctx.send(embed=embed, delete_after=5)
 
-    @commands.command()
+    @commands.command(aliases=['q'])
     @commands.guild_only()
     async def queue(self, ctx: commands.Context):
         """Show the entries of the queue."""

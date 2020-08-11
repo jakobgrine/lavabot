@@ -1,12 +1,12 @@
 import asyncio
 import async_timeout
 from collections import deque
+from . import converters
 import copy
 import datetime
 import discord
 from discord.ext import commands, menus
 import re
-from . import utils
 import wavelink
 
 
@@ -108,7 +108,8 @@ class Player(wavelink.Player):
 
         self.updating = True
 
-        duration = utils.format_timedelta(milliseconds=track.duration)
+        print(track.duration)
+        duration = converters.format_timedelta(milliseconds=track.duration)
         embed = discord.Embed(title='Now Playing',
                               description=f'[{track.title}]({track.uri})',
                               timestamp=track.requested_at)
